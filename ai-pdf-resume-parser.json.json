@@ -1,0 +1,205 @@
+{
+  "name": "AI PDF Resume Parser",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analyze this resume professionally.\n\nGive:\n1. Strengths\n2. Weaknesses\n3. Suggested improvements\n4. Suitable job roles\n5. Career advice\n6. ATS optimization suggestions\n\nResume:\n{{$json[\"text\"]}}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        416,
+        0
+      ],
+      "id": "9b56d2da-62f5-4f8d-b29c-ec2924be5290",
+      "name": "AI Resume Analyzer"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.1-8b-instant",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        352,
+        208
+      ],
+      "id": "9cdc12cf-d9d6-4f26-a077-b03a02e4754e",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "ZmBuT32Eqo7iiSKH",
+          "name": "Groq account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "formTitle": "AI PDF Resume Parser",
+        "formDescription": "Upload your resume PDF to receive AI-powered resume analysis.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Upload Resume PDF",
+              "fieldType": "file",
+              "fieldName": "resume"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.5,
+      "position": [
+        0,
+        0
+      ],
+      "id": "94098e71-2a44-4bb4-9e6e-25b73a0d0884",
+      "name": "Resume Upload Form",
+      "webhookId": "d96b0074-abff-4738-b3dd-68c2e5ec1f5e"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "resume",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "4b789375-204d-42c3-a179-4fbb1cb7da5c",
+      "name": "PDF Text Extractor"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "11OAKBeqWEtOw0Jm0cgIxzNzF7vgFN3EbQZgy13FAwlw",
+          "mode": "list",
+          "cachedResultName": "AI PDF Resume Parser",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/11OAKBeqWEtOw0Jm0cgIxzNzF7vgFN3EbQZgy13FAwlw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/11OAKBeqWEtOw0Jm0cgIxzNzF7vgFN3EbQZgy13FAwlw/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Resume Text": "={{$node[\"PDF Text Extractor\"].json[\"text\"]}}",
+            "Analysis": "={{$json[\"text\"]}}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Resume Text",
+              "displayName": "Resume Text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Analysis",
+              "displayName": "Analysis",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        720,
+        0
+      ],
+      "id": "53c0f770-1fb1-47b4-a345-7b33a910176b",
+      "name": "Save Analysis to Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "1jpFQHj5F9Ws5hY3",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Resume Analyzer",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Resume Analyzer": {
+      "main": [
+        [
+          {
+            "node": "Save Analysis to Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resume Upload Form": {
+      "main": [
+        [
+          {
+            "node": "PDF Text Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PDF Text Extractor": {
+      "main": [
+        [
+          {
+            "node": "AI Resume Analyzer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "3c85d60a-e361-43cf-825b-3a54d3e265a0",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0be8ca0f8bbae73a4da56401b4d3348c514ff7cba896c4f42a489f6d61210451"
+  },
+  "id": "wYDep9fHtjc96yV4",
+  "tags": []
+}
